@@ -1,10 +1,10 @@
 import { Link } from "react-router-dom";
 
 export default function Navbar() {
-  const user = JSON.parse(localStorage.getItem("user")); // <-- FIX
+  const role = localStorage.getItem("role"); // "admin" | "business" | null
 
   const handleLogout = () => {
-    localStorage.removeItem("user");
+    localStorage.removeItem("role");
     localStorage.removeItem("token");
     window.location = "/login";
   };
@@ -13,17 +13,17 @@ export default function Navbar() {
     <nav style={{ padding: "20px", background: "#ddd" }}>
       <Link to="/">Home</Link> |
 
-      {!user && <Link to="/login"> Login </Link>}
+      {!role && <Link to="/login"> Login </Link>}
 
-      {user?.role === "business" && (
+      {role === "business" && (
         <Link to="/business"> Business Dashboard </Link>
       )}
 
-      {user?.role === "admin" && (
+      {role === "admin" && (
         <Link to="/admin"> Admin Dashboard </Link>
       )}
-
-      {user && (
+      {/* else navigate("/"); */}
+      {role && (
         <button onClick={handleLogout}>Logout</button>
       )}
     </nav>
