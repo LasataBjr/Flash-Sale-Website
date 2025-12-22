@@ -73,7 +73,7 @@ const BusinessSchema = new mongoose.Schema(
       match: [/^https?:\/\/.+/, "Invalid Instagram URL"],
     },
 
-    verificationDocument: {
+    document: {
       type: String,
       required: [true, "Verification document required"],
       trim: true

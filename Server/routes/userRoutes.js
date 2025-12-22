@@ -7,7 +7,7 @@ const auth = require("../middleware/auth");
 const upload = require("../middleware/upload");
 const User = require("../models/User");
 const Business = require("../models/Business");
-
+const { uploadDocument, uploadImage } = upload;
 const router = express.Router();
 
 // Helper method
@@ -15,7 +15,7 @@ const sendError = (res, code, message) =>
   res.status(code).json({ success: false, message });
 
 // REGISTER (User + Business)
-router.post("/register", upload.single("verificationDocument"), async (req, res) => {
+router.post("/register", uploadDocument.single("verificationDocument"), async (req, res) => {
   try {
     const { role, email, password } = req.body;
 

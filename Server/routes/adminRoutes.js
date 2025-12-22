@@ -5,8 +5,10 @@ const auth = require("../middleware/auth");
 const nodemailer = require("nodemailer");
 const { sendMail } = require("../utils/email");
 // const adminCon = require("../controller/adminController");
-const { uploadDocument, uploadImage } = require("../middleware/upload");
+const upload = require("../middleware/upload");
 const router = express.Router();
+const { uploadDocument, uploadImage } = upload;
+
 
 // const { getBusinesses, approveBusiness, rejectBusiness } = adminCon;
 // GET all users

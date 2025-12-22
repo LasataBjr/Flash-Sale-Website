@@ -5,7 +5,7 @@ import Login from "./pages/Login";
 import Signup from "./pages/auth/Signup";
 import BusinessDashboard from "./pages/BusinessDashboard";
 import AdminDashboard from "./pages/AdminDashboard";
-import PrivateRoute from "./components/PrivateRoute";
+import ProtectedRoute from "./components/PrivateRoute";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
 import { Routes, Route } from "react-router-dom";
@@ -15,47 +15,46 @@ export default function App() {
     <>
       <Navbar />
       <Routes>
-      {/* PUBLIC */}
-      <Route path="/" element={<Home />} />
-      <Route path="/login" element={<Login />} />
-      <Route path="/auth/Signup" element={<Signup />} />
+        {/* PUBLIC ROUTES */}
+        <Route path="/" element={<Home />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/auth/Signup" element={<Signup />} />
 
-      {/* USER Private */}
+        {/* USER PRIVATE */}
         <Route
           path="/home"
           element={
-            <PrivateRoute allowed={["user"]}>
+            <ProtectedRoute allowed={["user"]}>
               <Home />
-            </PrivateRoute>
+            </ProtectedRoute>
           }
         />
 
-        {/* BUSINESS Private */}
+        {/* BUSINESS PRIVATE */}
         <Route
           path="/business-dashboard"
           element={
-            <PrivateRoute allowed={["business"]}>
+            <ProtectedRoute allowed={["business"]}>
               <BusinessDashboard />
-            </PrivateRoute>
+            </ProtectedRoute>
           }
         />
 
-        {/* ADMIN Private */}
+        {/* ADMIN PRIVATE */}
         <Route
           path="/admin"
           element={
-            <PrivateRoute allowed={["admin"]}>
+            <ProtectedRoute allowed={["admin"]}>
               <AdminDashboard />
-            </PrivateRoute>
+            </ProtectedRoute>
           }
         />
 
+        {/* AUTH ROUTES */}
         <Route path="/forgot-password" element={<ForgotPassword />} />
-
         <Route path="/reset-password" element={<ResetPassword />} />
 
       </Routes>
-
       <Footer />
     </>
   );
