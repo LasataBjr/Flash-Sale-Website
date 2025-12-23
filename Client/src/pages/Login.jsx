@@ -11,47 +11,43 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
 
   const handleLogin = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    setMessage("");
+  e.preventDefault();
+  setLoading(true);
+  setMessage("");
 
-    try {
-      const res = await axios.post("http://localhost:5000/api/users/login", {
-        email,
-        password,
-      });
+  try {
+    const res = await axios.post(
+      "http://localhost:5000/api/business/login",
+      { email, password }
+    );
 
-       // block pending or rejected accounts
-      if (res.data.user.status === "pending") {
-        setMessage("Your account is pending approval ❌");
-        setLoading(false);
-        return;
-      }
+    const { token, user } = res.data;
 
-      if (res.data.user.status === "rejected") {
-        setMessage("Your account was rejected ❌");
-        setLoading(false);
-        return;
-      }
-
-      // Save to localStorage
-      localStorage.setItem("token", res.data.token);
-      localStorage.setItem("role", res.data.user.role); 
-
-      const role = res.data.user.role;
-      setMessage("Login successful ✔");
-
-      // Redirect by role
-      if (role === "admin") navigate("/admin");
-      else if (role === "business") navigate("/business");
-      else navigate("/");
-
-    } catch (err) {
-      setMessage(err.response?.data?.message || "Login failed ❌");
+    // handle business status
+    if (user.status === "pending") {
+      setMessage("Your account is pending approval ❌");
+      return;
     }
 
-    setLoading(false);
-  };
+    if (user.status === "rejected") {
+      setMessage("Your account was rejected ❌");
+      return;
+    }
+
+    // ✅ STORE USER PROPERLY
+    localStorage.setItem("token", token);
+    localStorage.setItem("user", JSON.stringify(user));
+
+    console.log("SAVED USER:", user); // debug
+    navigate("/business-dashboard");
+
+  } catch (err) {
+    setMessage(err.response?.data?.message || "Login failed");
+  }
+
+  setLoading(false);
+};
+
 
   return (
     <div style={{ width: "400px", margin: "auto", paddingTop: "50px" }}>

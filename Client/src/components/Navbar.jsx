@@ -16,7 +16,7 @@ export default function Navbar() {
       {!role && <Link to="/login"> Login </Link>}
 
       {role === "business" && (
-        <Link to="/business"> Business Dashboard </Link>
+        <Link to="/business-dashboard"> Business Dashboard </Link>
       )}
 
       {role === "admin" && (

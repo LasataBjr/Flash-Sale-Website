@@ -2,17 +2,29 @@
 const express = require("express");
 const cors = require("cors");
 const mongoose = require("mongoose");
+const path = require("path");
 require("dotenv").config();
 
 const app = express();
 
-app.use(cors());
+app.use(cors());// Allow requests from your frontend
 app.use(express.json());
 
+// Serve static files from the 'uploads' directory (absolute path for reliability)
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
+// Optional: Log the path for debugging (remove after fixing)
+console.log('Static path:', path.join(__dirname, 'uploads'));
+
 // Routes
+//Users
 const userRoutes = require("./routes/userRoutes");
 app.use("/api/users", userRoutes);
 
+//Business
+app.use("/api/business", require("./routes/business.routes"));
+
+//Admin
 const adminRoutes = require("./routes/adminRoutes");
 app.use("/api/admin", adminRoutes);
 
