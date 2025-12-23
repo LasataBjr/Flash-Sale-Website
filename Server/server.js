@@ -22,7 +22,8 @@ const userRoutes = require("./routes/userRoutes");
 app.use("/api/users", userRoutes);
 
 //Business
-app.use("/api/business", require("./routes/business.routes"));
+const businessRoutes = require("./routes/businessRoutes");
+app.use("/api/business", businessRoutes);
 
 //Admin
 const adminRoutes = require("./routes/adminRoutes");
