@@ -5,6 +5,7 @@ Server/node_modules/
 
 # environment variables
 .env
+Client/.env
 Server/.env
 
 # build & cache
