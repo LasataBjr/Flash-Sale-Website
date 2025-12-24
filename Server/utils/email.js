@@ -10,7 +10,7 @@ const transporter = nodemailer.createTransport({
 
 exports.sendMail = async (to, subject, html) => {
   return transporter.sendMail({
-    from: `"Account Approval" <${process.env.SMTP_EMAIL}>`,
+    from: `"Flash Sale" <${process.env.SMTP_EMAIL}>`,
     to,
     subject,
     html,

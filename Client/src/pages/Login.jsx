@@ -4,55 +4,57 @@ import { useNavigate } from "react-router-dom";
 
 export default function Login() {
   const navigate = useNavigate();
-
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
 
   const handleLogin = async (e) => {
-  e.preventDefault();
-  setLoading(true);
-  setMessage("");
+    e.preventDefault();
+    setLoading(true);
+    setMessage("");
 
-  try {
-    const res = await axios.post(
-      "http://localhost:5000/api/business/login",
-      { email, password }
-    );
+    try {
+      const res = await axios.post("http://localhost:5000/api/users/login", {
+        email,
+        password,
+      });
 
-    const { token, user } = res.data;
+      // block pending or rejected accounts
+      if (res.data.user.status === "pending") {
+        setMessage("Your account is pending approval ❌");
+        setLoading(false);
+        return;
+      }
+      if (res.data.user.status === "rejected") {
+        setMessage("Your account was rejected ❌");
+        setLoading(false);
+        return;
+      }
 
-    // handle business status
-    if (user.status === "pending") {
-      setMessage("Your account is pending approval ❌");
-      return;
+      // Save to localStorage
+      localStorage.setItem("token", res.data.token);
+      localStorage.setItem("role", res.data.user.role);
+      // NOTE: The original code sets 'user' in the dashboard but not here.
+      // If 'user' is needed in other components, you should save res.data.user here as well.
+      // localStorage.setItem("user", JSON.stringify(res.data.user)); 
+
+      const role = res.data.user.role;
+      setMessage("Login successful ✔");
+
+      // Redirect by role
+      if (role === "admin") navigate("/admin");
+      else if (role === "business") navigate("/business");
+      else navigate("/");
+    } catch (err) {
+      setMessage(err.response?.data?.message || "Login failed ❌");
     }
-
-    if (user.status === "rejected") {
-      setMessage("Your account was rejected ❌");
-      return;
-    }
-
-    // ✅ STORE USER PROPERLY
-    localStorage.setItem("token", token);
-    localStorage.setItem("user", JSON.stringify(user));
-
-    console.log("SAVED USER:", user); // debug
-    navigate("/business-dashboard");
-
-  } catch (err) {
-    setMessage(err.response?.data?.message || "Login failed");
-  }
-
-  setLoading(false);
-};
-
+    setLoading(false);
+  };
 
   return (
     <div style={{ width: "400px", margin: "auto", paddingTop: "50px" }}>
       <h2>Login</h2>
-
       <form onSubmit={handleLogin}>
         <input
           type="email"
@@ -61,8 +63,9 @@ export default function Login() {
           onChange={(e) => setEmail(e.target.value)}
           required
           style={{ width: "100%", padding: "8px" }}
-        /><br /><br />
-
+        />
+        <br />
+        <br />
         <input
           type="password"
           placeholder="Enter Password"
@@ -70,12 +73,12 @@ export default function Login() {
           onChange={(e) => setPassword(e.target.value)}
           required
           style={{ width: "100%", padding: "8px" }}
-        /><br /><br />
-
+        />
+        <br />
+        <br />
         <button type="submit" disabled={loading}>
           {loading ? "Logging in..." : "Login"}
         </button>
-
         <p style={{ marginTop: "10px" }}>
           Forgot Password?{" "}
           <span
@@ -95,7 +98,6 @@ export default function Login() {
           </span>
         </p>
       </form>
-
       {message && <p>{message}</p>}
     </div>
   );
