@@ -27,7 +27,7 @@ export default function ResetPassword() {
     }
 
     try {
-      const res = await axios.post(`${backendURL}/users/reset-password`, {
+      const res = await axios.post(`${backendURL}/auth/reset-password`, {
         token,
         password,
       });

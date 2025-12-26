@@ -15,7 +15,7 @@ export default function Login() {
     setMessage("");
 
     try {
-      const res = await axios.post("http://localhost:5000/api/users/login", {
+      const res = await axios.post("http://localhost:5000/api/auth/login", {
         email,
         password,
       });
@@ -34,17 +34,17 @@ export default function Login() {
 
       // Save to localStorage
       localStorage.setItem("token", res.data.token);
-      localStorage.setItem("role", res.data.user.role);
+      localStorage.setItem("user", JSON.stringify(res.data.user));
       // NOTE: The original code sets 'user' in the dashboard but not here.
       // If 'user' is needed in other components, you should save res.data.user here as well.
       // localStorage.setItem("user", JSON.stringify(res.data.user)); 
 
       const role = res.data.user.role;
       setMessage("Login successful ✔");
-
+    
       // Redirect by role
       if (role === "admin") navigate("/admin");
-      else if (role === "business") navigate("/business");
+      else if (role === "business") navigate("/business-dashboard");
       else navigate("/");
     } catch (err) {
       setMessage(err.response?.data?.message || "Login failed ❌");

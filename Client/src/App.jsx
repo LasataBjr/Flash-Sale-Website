@@ -1,5 +1,6 @@
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
+import TestLoginAPI from "./pages/TestLoginAPI";
 
 import Home from "./pages/Home";
 import Login from "./pages/Login";
@@ -19,7 +20,8 @@ export default function App() {
       <Routes>
         
         {/* PUBLIC ROUTES */}
-        <Route path="/" element={<Home />} />
+        <Route path="/" element={<Home />} />        
+        <Route path="/test-login" element={<TestLoginAPI />} />
         <Route path="/login" element={<Login />} />
         <Route path="/auth/Signup" element={<Signup />} />
 
