@@ -1,14 +1,88 @@
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import axios from "axios";
+
 export default function BusinessDashboard() {
-  const user = JSON.parse(localStorage.getItem("user"));
-  console.log("LOCAL USER:", localStorage.getItem("user"));
+  const navigate = useNavigate();
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [message, setMessage] = useState("");
+
+  const backendURL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
+
+  // Fetch user data from localStorage or backend
+  const fetchUserData = async () => {
+    const storedUser = localStorage.getItem("user");
+    if (!storedUser) {
+      navigate("/login");
+      return;
+    }
+
+    const parsedUser = JSON.parse(storedUser);
+    try {
+      // Fetch latest user data from backend
+      const res = await axios.get(`${backendURL}/business/${parsedUser._id}`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
+
+      setUser(res.data.user);
+      localStorage.setItem("user", JSON.stringify(res.data.user)); // update localStorage
+    } catch (err) {
+      console.error(err);
+      setMessage("Failed to fetch latest data. Please login again.");
+      localStorage.removeItem("user");
+      localStorage.removeItem("token");
+      navigate("/login");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchUserData();
+  }, []);
+
+  const handleLogout = () => {
+    localStorage.removeItem("user");
+    localStorage.removeItem("token");
+    navigate("/login");
+  };
+
+  if (loading) return <p style={{ padding: "40px" }}>Loading...</p>;
+  if (!user)
+    return (
+      <div style={{ padding: "40px" }}>
+        <h1>No user data found ❌</h1>
+        <p>Please login first.</p>
+      </div>
+    );
+
   return (
     <div style={{ padding: "40px" }}>
       <h1>Business Dashboard</h1>
-      <h3>Welcome, {user?.email}</h3>
-      <p>Your role: {user?.role}</p>
-      <p>Status: {user?.status}</p>
-    </div>
-    
+      <h3>Welcome, {user.businessName || user.email}</h3>
+      <p><strong>Role:</strong> {user.role}</p>
+      <p><strong>Status:</strong> {user.status}</p>
+      <p><strong>Email:</strong> {user.email}</p>
+      <p><strong>Owner Name:</strong> {user.ownerName}</p>
+      <p><strong>Phone:</strong> {user.phone}</p>
+      <p><strong>Business Type:</strong> {user.businessType}</p>
+      <p><strong>Address:</strong> {user.address}</p>
+      <p><strong>Wallet Balance:</strong> ${user.walletBalance ?? 0}</p>
+      <p><strong>Total Products:</strong> {user.totalProducts ?? 0}</p>
+      <p><strong>Total Clicks:</strong> {user.totalClicks ?? 0}</p>
+      <p><strong>Purchased Clients:</strong> {user.purchasedClients ?? 0}</p>
 
+      <button
+        onClick={handleLogout}
+        style={{ marginTop: "20px", padding: "10px 20px", cursor: "pointer" }}
+      >
+        Logout
+      </button>
+
+      {message && <p style={{ color: "red" }}>{message}</p>}
+    </div>
   );
 }

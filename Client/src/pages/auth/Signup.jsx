@@ -76,7 +76,7 @@ const Signup = () => {
     }
 
     try {
-      const res = await axios.post(`${backendURL}/users/register`, data);
+      const res = await axios.post(`${backendURL}/auth/register`, data);
       setMessage(res.data.message);
       setTimeout(() => navigate("/login"), 1500);
     } catch (err) {

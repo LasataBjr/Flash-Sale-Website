@@ -29,6 +29,10 @@ app.use("/api/business", businessRoutes);
 const adminRoutes = require("./routes/adminRoutes");
 app.use("/api/admin", adminRoutes);
 
+//Auth
+const authRoutes = require("./routes/authRoutes");
+app.use("/api/auth", authRoutes);
+
 // MongoDB Connection
 mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log("MongoDB Connected"))

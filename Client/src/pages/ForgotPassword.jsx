@@ -1,23 +1,26 @@
 import React, { useState } from "react";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
 
-// Backend base URL
 const backendURL = import.meta.env.VITE_API_URL;
 
 export default function ForgotPassword() {
   const [email, setEmail] = useState("");
-  const [token, setToken] = useState("");
-  const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
+  const [sent, setSent] = useState(false);
+  const [error, setError] = useState("");
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
+    setError("");
+
     try {
-      const res = await axios.post(`${backendURL}/users/request-reset`, { email });
-      alert("Reset token generated!");
-      setToken(res.data.token); // show token temporarily
+      await axios.post(`${backendURL}/auth/request-reset`, { email });
+      setSent(true);
     } catch (err) {
-      alert(err.response?.data?.message || "Error requesting reset");
+      setError(err.response?.data?.message || "Error requesting reset");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -32,24 +35,22 @@ export default function ForgotPassword() {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
-        /><br/><br/>
+        />
+        <br /><br />
 
-        <button type="submit">Request Reset</button>
+        <button type="submit" disabled={loading}>
+          {loading ? "Sending..." : sent ? "Resend Reset Link" : "Send Reset Link"}
+        </button>
       </form>
 
-      {/* Show token for manual testing */}
-      {token && (
-        <div style={{ marginTop: 20 }}>
-          <strong>Use this token for reset:</strong>
-          <p>{token}</p>
+      {sent && (
+        <p style={{ color: "green", marginTop: 15 }}>
+          Reset link sent to your email.
+        </p>
+      )}
 
-          <button
-            onClick={() => navigate(`/reset-password?token=${token}`)}
-            style={{ marginTop: 10 }}
-          >
-            Reset Password Now
-          </button>
-        </div>
+      {error && (
+        <p style={{ color: "red", marginTop: 15 }}>{error}</p>
       )}
     </div>
   );

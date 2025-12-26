@@ -1,18 +1,20 @@
 import { Navigate } from "react-router-dom";
 
 export default function PrivateRoute({ children, allowed }) {
+  // Get token and user from localStorage
   const token = localStorage.getItem("token");
-  const role = localStorage.getItem("role");
+  const user = JSON.parse(localStorage.getItem("user"));
 
-  // not logged in
-  if (!token) {
+  // Not logged in or no user data
+  if (!token || !user) {
     return <Navigate to="/login" />;
   }
 
-  // role not allowed
-  if (allowed && !allowed.includes(role)) {
+  // Role not allowed
+  if (allowed && !allowed.includes(user.role)) {
     return <Navigate to="/" />;
   }
 
+  // User is authorized
   return children;
 }
