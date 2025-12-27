@@ -17,6 +17,7 @@ const sendError = (res, code, message) => {
   });
 };
 
+
 router.get("/test", (req, res) => {
   res.send("AUTH ROUTE WORKS");
 });
@@ -92,10 +93,9 @@ router.get("/test", (req, res) => {
 
     sendError(res, 400, "Invalid role");
   } catch (err) {
+    console.log("REGISTER ERROR 👉", err.message);
     console.log(err);
-    console.log("BODY:", req.body);
-console.log("FILES:", req.files);
-    sendError(res, 500, "Registration failed");
+    res.status(500).json({ success: false, error: err.message });
   }
 });
 
