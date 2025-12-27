@@ -7,7 +7,8 @@ const folders = [
   "uploads",
   "uploads/profiles",
   "uploads/businessLogo",
-  "uploads/businessDocs"
+  "uploads/businessDocs",
+  "uploads/products"
 ];
 
 folders.forEach(dir => {
@@ -18,9 +19,10 @@ const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     if (file.fieldname === "profileImage") return cb(null, "uploads/profiles");
     if (file.fieldname === "businessLogo") return cb(null, "uploads/businessLogo");
-    if (file.fieldname === "verificationDocument")
-      return cb(null, "uploads/businessDocs");
+    if (file.fieldname === "verificationDocument") return cb(null, "uploads/businessDocs");
+    if (file.fieldname === "productImages") return cb(null, "uploads/products"); // ✅ NEW
 
+    cb(null, "uploads");
     cb(null, "uploads"); // fallback
   },
   filename: function (req, file, cb) {
@@ -33,7 +35,7 @@ const imageTypes = ["image/jpeg", "image/png", "image/jpg"];
 const pdfTypes = ["application/pdf"];
 
 const fileFilter = (req, file, cb) => {
-  if (file.fieldname === "businessLogo" || file.fieldname === "profileImage") {
+  if (file.fieldname === "businessLogo" || file.fieldname === "profileImage" || file.fieldname === "productImages") {
     if (!imageTypes.includes(file.mimetype))
       return cb(new Error("Only JPG/JPEG/PNG allowed"));
   }
@@ -62,9 +64,14 @@ const multiUpload = upload.fields([
   { name: "profileImage", maxCount: 1 }
 ]);
 
+/* ================= PRODUCT ================= */
+//  Multiple product images (max 5)
+const uploadProductImages = upload.array("productImages", 5);
+
 module.exports = {
   uploadProfileImage,
   uploadBusinessLogo,
   uploadVerificationDocument,
-  multiUpload
+  multiUpload,
+  uploadProductImages
 };

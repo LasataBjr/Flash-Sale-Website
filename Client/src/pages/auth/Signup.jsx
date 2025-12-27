@@ -74,6 +74,7 @@ const Signup = () => {
         return setMessage("Verification document required");
       data.append("verificationDocument", verificationDocument);
     }
+    console.log("API URL:", import.meta.env.VITE_API_URL);
 
     try {
       const res = await axios.post(`${backendURL}/auth/register`, data);

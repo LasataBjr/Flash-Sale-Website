@@ -10,6 +10,13 @@ const crypto = require("crypto");
 const Business = require("../models/Business");
 const User = require("../models/User");
 
+const sendError = (res, code, message) => {
+  return res.status(code).json({
+    success: false,
+    message,
+  });
+};
+
 
 router.get("/test", (req, res) => {
   res.send("AUTH ROUTE WORKS");
@@ -63,8 +70,9 @@ router.post("/register", multiUpload, async (req, res) => {
 
     sendError(res, 400, "Invalid role");
   } catch (err) {
+    console.log("REGISTER ERROR 👉", err.message);
     console.log(err);
-    sendError(res, 500, "Registration failed");
+    res.status(500).json({ success: false, error: err.message });
   }
 });
 

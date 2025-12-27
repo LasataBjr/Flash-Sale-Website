@@ -33,6 +33,10 @@ app.use("/api/admin", adminRoutes);
 const authRoutes = require("./routes/authRoutes");
 app.use("/api/auth", authRoutes);
 
+//Product
+const productRoutes = require("./routes/productRoutes");
+app.use("/api/products", productRoutes);
+
 // MongoDB Connection
 mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log("MongoDB Connected"))
