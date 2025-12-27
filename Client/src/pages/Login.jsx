@@ -32,20 +32,21 @@ export default function Login() {
         return;
       }
 
-      // Save to localStorage
-      localStorage.setItem("token", res.data.token);
-      localStorage.setItem("user", JSON.stringify(res.data.user));
+      // Save to sessionStorage
+      sessionStorage.setItem("token", res.data.token);
+      sessionStorage.setItem("user", JSON.stringify(res.data.user));
       // NOTE: The original code sets 'user' in the dashboard but not here.
       // If 'user' is needed in other components, you should save res.data.user here as well.
-      // localStorage.setItem("user", JSON.stringify(res.data.user)); 
+      // sessionStorage.setItem("user", JSON.stringify(res.data.user)); 
 
       const role = res.data.user.role;
       setMessage("Login successful ✔");
-    
+      console.log("Logged in user role:", role);
+
       // Redirect by role
       if (role === "admin") navigate("/admin");
       else if (role === "business") navigate("/business-dashboard");
-      else navigate("/");
+      else navigate("/home");
     } catch (err) {
       setMessage(err.response?.data?.message || "Login failed ❌");
     }

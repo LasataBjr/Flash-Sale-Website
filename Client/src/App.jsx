@@ -10,6 +10,7 @@ import AdminDashboard from "./pages/AdminDashboard";
 import ProtectedRoute from "./components/PrivateRoute";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
+import Logout from "./components/Logout";
 import { Routes, Route } from "react-router-dom";
 
 
@@ -24,6 +25,7 @@ export default function App() {
         <Route path="/test-login" element={<TestLoginAPI />} />
         <Route path="/login" element={<Login />} />
         <Route path="/auth/Signup" element={<Signup />} />
+        <Route path="/logout" element={<Logout />} />
 
         {/* USER PRIVATE */}
         <Route

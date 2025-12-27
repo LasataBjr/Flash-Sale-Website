@@ -1,39 +1,41 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
+
 
 export default function BusinessDashboard() {
-  const navigate = useNavigate();
+
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState("");
+  const navigate = useNavigate();
 
   const backendURL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
 
-  // Fetch user data from localStorage or backend
+  // Fetch user data from sessionStorage or backend
   const fetchUserData = async () => {
-    const storedUser = localStorage.getItem("user");
+    const storedUser = sessionStorage.getItem("user");
     if (!storedUser) {
       navigate("/login");
       return;
     }
-
+    const token = sessionStorage.getItem("token");
     const parsedUser = JSON.parse(storedUser);
     try {
       // Fetch latest user data from backend
       const res = await axios.get(`${backendURL}/business/${parsedUser._id}`, {
         headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
+          Authorization: `Bearer ${token}`,
         },
       });
 
       setUser(res.data.user);
-      localStorage.setItem("user", JSON.stringify(res.data.user)); // update localStorage
+      sessionStorage.setItem("user", JSON.stringify(res.data.user)); // update sessionStorage
     } catch (err) {
       console.error(err);
       setMessage("Failed to fetch latest data. Please login again.");
-      localStorage.removeItem("user");
-      localStorage.removeItem("token");
+      sessionStorage.removeItem("user");
+      sessionStorage.removeItem("token");
       navigate("/login");
     } finally {
       setLoading(false);
@@ -44,11 +46,11 @@ export default function BusinessDashboard() {
     fetchUserData();
   }, []);
 
-  const handleLogout = () => {
-    localStorage.removeItem("user");
-    localStorage.removeItem("token");
-    navigate("/login");
-  };
+  // const handleLogout = () => {
+  //   sessionStorage.removeItem("user");
+  //   sessionStorage.removeItem("token");
+  //   navigate("/login");
+  // };
 
   if (loading) return <p style={{ padding: "40px" }}>Loading...</p>;
   if (!user)
@@ -75,12 +77,14 @@ export default function BusinessDashboard() {
       <p><strong>Total Clicks:</strong> {user.totalClicks ?? 0}</p>
       <p><strong>Purchased Clients:</strong> {user.purchasedClients ?? 0}</p>
 
-      <button
+      {/* <button
         onClick={handleLogout}
         style={{ marginTop: "20px", padding: "10px 20px", cursor: "pointer" }}
       >
         Logout
-      </button>
+      </button> */}
+      <button onClick={() => navigate("/logout")} style={{ marginTop: "20px", padding: "10px 20px", cursor: "pointer" }}
+      >Logout</button>
 
       {message && <p style={{ color: "red" }}>{message}</p>}
     </div>

@@ -10,6 +10,12 @@ const crypto = require("crypto");
 const Business = require("../models/Business");
 const User = require("../models/User");
 
+const sendError = (res, code, message) => {
+  return res.status(code).json({
+    success: false,
+    message,
+  });
+};
 
 router.get("/test", (req, res) => {
   res.send("AUTH ROUTE WORKS");
@@ -17,7 +23,15 @@ router.get("/test", (req, res) => {
 
 
 /* ================= USER & Business Register ================= */
-router.post("/register", multiUpload, async (req, res) => {
+// router.post("/register", multiUpload, async (req, res) => {
+  router.post("/register", (req, res, next) => {
+    multiUpload(req, res, function (err) {
+      if (err) {
+        return sendError(res, 400, err.message);
+      }
+      next();
+    });
+  }, async (req, res) => {
   try {
     const { role, email, password } = req.body;
 
@@ -42,14 +56,28 @@ router.post("/register", multiUpload, async (req, res) => {
 
     // BUSINESS REG
     if (role === "business") {
-      const docFile = req.files?.verificationDocument?.[0]?.filename;
-      const logoFile = req.files?.businessLogo?.[0]?.filename;
 
+      if (!req.files?.businessLogo || !req.files?.verificationDocument) {
+        return sendError(res, 400, "Business logo & verification document required");
+      }
+    
+      const logoFile = req.files.businessLogo[0].filename;
+      const docFile = req.files.verificationDocument[0].filename;
+    
+      const businessLogo = `/uploads/businessLogo/${logoFile}`;
       const verificationDocument = `/uploads/businessDocs/${docFile}`;
-      const businessLogo = logoFile ? `/uploads/businessLogo/${logoFile}` : null;
-
+    
       await new Business({
-        ...req.body,
+        businessName: req.body.businessName,
+        ownerName: req.body.ownerName,
+        phone: req.body.phone,
+        businessType: req.body.businessType,
+        address: req.body.address,
+        businessDetail: req.body.businessDetail,
+        websiteURL: req.body.websiteURL,
+        facebookURL: req.body.facebookURL,
+        instagramURL: req.body.instagramURL,
+    
         email,
         password: hashed,
         role,
@@ -57,13 +85,16 @@ router.post("/register", multiUpload, async (req, res) => {
         businessLogo,
         verificationDocument
       }).save();
-
+    
       return res.json({ success: true, message: "Pending approval" });
     }
+    
 
     sendError(res, 400, "Invalid role");
   } catch (err) {
     console.log(err);
+    console.log("BODY:", req.body);
+console.log("FILES:", req.files);
     sendError(res, 500, "Registration failed");
   }
 });
