@@ -3,6 +3,7 @@ const express = require("express");
 const cors = require("cors");
 const mongoose = require("mongoose");
 const path = require("path");
+const multer = require("multer");
 require("dotenv").config();
 
 const app = express();
@@ -36,6 +37,27 @@ app.use("/api/auth", authRoutes);
 //Product
 const productRoutes = require("./routes/productRoutes");
 app.use("/api/products", productRoutes);
+
+// Category
+const categoryRoutes = require("./routes/categoryRoutes");
+app.use("/api/categories", categoryRoutes);
+
+// Multer / Global Error Handler
+app.use((err, req, res, next) => {
+  console.error("UPLOAD ERROR:", err.message);
+
+  if (err instanceof multer.MulterError) {
+    return res.status(400).json({
+      success: false,
+      message: err.message,
+    });
+  }
+
+  res.status(400).json({
+    success: false,
+    message: err.message || "Something went wrong",
+  });
+});
 
 // MongoDB Connection
 mongoose.connect(process.env.MONGO_URI)

@@ -2,11 +2,9 @@ const jwt = require("jsonwebtoken");
 const User = require("../models/User");
 const Business = require("../models/Business");
 
-module.exports =
-  (allowedRoles = []) =>
-  async (req, res, next) => {
+module.exports = (allowedRoles = []) => {
+  return async (req, res, next) => {
     try {
-      //Verify JWT token
       const token = req.headers.authorization?.split(" ")[1];
       if (!token) {
         return res.status(401).json({ success: false, message: "Unauthorized: No Token Provided" });
@@ -14,7 +12,7 @@ module.exports =
 
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-      let account =
+      const account =
         decoded.role === "business"
           ? await Business.findById(decoded.id)
           : await User.findById(decoded.id);
@@ -23,21 +21,18 @@ module.exports =
         return res.status(404).json({ success: false, message: "Account Not Found" });
       }
 
-      // Role Restricted Route
       if (allowedRoles.length > 0 && !allowedRoles.includes(account.role)) {
         return res.status(403).json({ success: false, message: "Forbidden: Role Access Denied" });
       }
 
-      // Business Status Restrictions
       if (account.role === "business") {
-        if (account.status === "pending") {
+          if (account.status === "pending") {
           return res.status(403).json({
             success: false,
             status: "pending",
             message: "Your business approval is pending. Admin will review shortly.",
           });
         }
-
         if (account.status === "rejected") {
           return res.status(403).json({
             success: false,
@@ -48,9 +43,10 @@ module.exports =
       }
 
       req.user = account;
-      next();
+      return next();
     } catch (err) {
-      console.log(err);
-      res.status(401).json({ success: false, message: "Invalid or Expired Token" });
+      console.error("Auth error:", err);
+      return res.status(401).json({ success: false, message: "Invalid or Expired Token" });
     }
   };
+};

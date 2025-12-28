@@ -1,29 +1,25 @@
-import { useState, useEffect } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
 export default function AddProduct() {
   const navigate = useNavigate();
-  const { id } = useParams();
-  const isEdit = Boolean(id);
+  const API = import.meta.env.VITE_API_URL;
 
-  const backendURL = import.meta.env.VITE_API_URL;
-
-  // ENUMS MUST MATCH BACKEND
-  const categories = [
-    "Food & Beverage",
-    "Electronics",
-    "Fashion",
-    "Travel",
-    "Health & Beauty",
-    "Education",
-    "Automobile",
-    "Real Estate",
-    "Home & Living",
-    "Entertainment",
-    "Services",
-    "Others",
-  ];
+  const categories = {
+    "Fashion & Lifestyle": ["Men", "Women", "Kids"],
+    "Cosmetic/Beauty": ["Skincare", "Makeup", "Haircare"],
+    "Electronics & Gadgets": ["Mobile", "Laptop", "Accessories"],
+    "Sports & Fitness": ["Gym Equipment", "Sportswear"],
+    "Automotive & Accessories": ["Car", "Motorbike", "Spare Parts"],
+    "Home Appliances": ["Kitchen", "Laundry", "Cooling/Heating"],
+    "Grocery": ["Vegetables", "Fruits", "Packaged Goods"],
+    "Stationery": ["Books", "Writing Tools", "Office Supplies"],
+    "Household & Living": ["Furniture", "Decor", "Bedding"],
+    "Health & Wellness": ["Supplements", "Medical", "Fitness Gear"],
+    "Accommodation": ["Hotels", "Hostels", "Rentals"],
+    "Entertainment Hub": ["Movies", "Games", "Events"],
+  };
 
   const dealTypes = [
     "Flash Deal",
@@ -40,6 +36,7 @@ export default function AddProduct() {
     discount: "",
     stockQuantity: "",
     category: "",
+    subCategory: "",
     dealType: "",
     redirectUrl: "",
     expiryDate: "",
@@ -48,175 +45,78 @@ export default function AddProduct() {
   const [images, setImages] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  // LOAD PRODUCT FOR EDIT
-  useEffect(() => {
-    if (isEdit) fetchProduct();
-  }, [id]);
-
-  const fetchProduct = async () => {
-    try {
-      const res = await axios.get(`${backendURL}/products/${id}`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-      });
-
-      setForm({
-        ...res.data.data,
-        expiryDate: res.data.data.expiryDate?.split("T")[0] || "",
-      });
-    } catch (err) {
-      console.error("FETCH PRODUCT ERROR:", err);
-    }
-  };
-
-  // INPUT HANDLER
-  const handleChange = (e) => {
+  const handleChange = (e) =>
     setForm({ ...form, [e.target.name]: e.target.value });
-  };
 
-  const handleImageChange = (e) => {
-    setImages([...e.target.files]);
-  };
+  const handleCategoryChange = (e) =>
+    setForm({ ...form, category: e.target.value, subCategory: "" });
 
-  // SUBMIT
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
 
     try {
       const formData = new FormData();
-
-      Object.entries(form).forEach(([key, value]) => {
-        if (value !== "") formData.append(key, value);
+      Object.entries(form).forEach(([k, v]) => formData.append(k, v));
+      images.forEach((img) => {
+        formData.append("productImages", img); // ✅ MUST MATCH
       });
 
-      images.forEach((img) => formData.append("productImages", img));
 
-      const config = {
+      await axios.post(`${API}/products`, formData, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
-      };
+      });
 
-      let res;
-      if (isEdit) {
-        res = await axios.put(`${backendURL}/products/${id}`, formData, config);
-      } else {
-        res = await axios.post(`${backendURL}/products`, formData, config);
-      }
-
-      if (res.data?.success) {
-        navigate("/business/products");
-      } else {
-        alert(res.data?.message || "Product save failed");
-      }
+      navigate("/business/products");
     } catch (err) {
-      console.error("PRODUCT SAVE ERROR:", err.response?.data || err);
-      alert(err.response?.data?.message || "Failed to save product");
+      alert(err.response?.data?.message || "Failed to create product");
     } finally {
       setLoading(false);
     }
   };
 
-  // UI
   return (
-    <div className="container mt-4">
-      <h2>{isEdit ? "Edit Product" : "Add Product Deal"}</h2>
+    <div className="container">
+      <h2>Add Product Deal</h2>
 
       <form onSubmit={handleSubmit} encType="multipart/form-data">
-        <input
-          name="title"
-          placeholder="Product Title"
-          value={form.title}
-          onChange={handleChange}
-          required
-        />
+        <input name="title" placeholder="Title" onChange={handleChange} required />
+        <textarea name="description" placeholder="Description" onChange={handleChange} required />
+        <input type="number" name="price" placeholder="Price" onChange={handleChange} required />
+        <input type="number" name="discount" placeholder="Discount %" onChange={handleChange} />
+        <input type="number" name="stockQuantity" placeholder="Stock" onChange={handleChange} required />
 
-        <textarea
-          name="description"
-          placeholder="Product Description"
-          value={form.description}
-          onChange={handleChange}
-          required
-        />
-
-        <input
-          type="number"
-          name="price"
-          placeholder="Price"
-          value={form.price}
-          onChange={handleChange}
-          required
-        />
-
-        <input
-          type="number"
-          name="discount"
-          placeholder="Discount (%)"
-          value={form.discount}
-          onChange={handleChange}
-        />
-
-        <input
-          type="number"
-          name="stockQuantity"
-          placeholder="Stock Quantity"
-          value={form.stockQuantity}
-          onChange={handleChange}
-          required
-        />
-
-        <select
-          name="category"
-          value={form.category}
-          onChange={handleChange}
-          required
-        >
+        <select name="category" onChange={handleCategoryChange} required>
           <option value="">Select Category</option>
-          {categories.map((cat) => (
-            <option key={cat} value={cat}>
-              {cat}
-            </option>
+          {Object.keys(categories).map((c) => (
+            <option key={c} value={c}>{c}</option>
           ))}
         </select>
 
-        <select
-          name="dealType"
-          value={form.dealType}
-          onChange={handleChange}
-          required
-        >
-          <option value="">Select Deal Type</option>
-          {dealTypes.map((deal) => (
-            <option key={deal} value={deal}>
-              {deal}
-            </option>
+        {form.category && (
+          <select name="subCategory" onChange={handleChange} required>
+            <option value="">Select Subcategory</option>
+            {categories[form.category].map((s) => (
+              <option key={s} value={s}>{s}</option>
+            ))}
+          </select>
+        )}
+
+        <select name="dealType" onChange={handleChange} required>
+          <option value="">Select Deal</option>
+          {dealTypes.map((d) => (
+            <option key={d} value={d}>{d}</option>
           ))}
         </select>
 
-        <input
-          type="url"
-          name="redirectUrl"
-          placeholder="Vendor Website Link"
-          value={form.redirectUrl}
-          onChange={handleChange}
-          required
-        />
+        <input type="url" name="redirectUrl" placeholder="Vendor Website" onChange={handleChange} required />
+        <input type="date" name="expiryDate" onChange={handleChange} required />
 
-        <input
-          type="date"
-          name="expiryDate"
-          value={form.expiryDate}
-          onChange={handleChange}
-          required
-        />
+        <input type="file" multiple onChange={(e) => setImages([...e.target.files])} />
 
-        <input type="file" multiple onChange={handleImageChange} />
-
-        <button type="submit" disabled={loading}>
-          {loading ? "Saving..." : "Save Product"}
-        </button>
+        <button disabled={loading}>{loading ? "Saving..." : "Post Deal"}</button>
       </form>
     </div>
   );

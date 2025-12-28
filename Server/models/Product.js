@@ -1,75 +1,40 @@
-// models/Product.js
 const mongoose = require("mongoose");
+const categoryMap = require("../config/categoryMap");
 
 const ProductSchema = new mongoose.Schema(
   {
-    // 🔗 Business who posted the deal
     business: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Business",
       required: true,
-      index: true,
     },
 
-    // 🏷️ Product Title
-    title: {
-      type: String,
-      required: true,
-      trim: true,
-    },
+    title: { type: String, required: true },
+    description: { type: String, required: true },
 
-    // 📝 Product Description
-    description: {
-      type: String,
-      required: true,
-    },
+    price: { type: Number, required: true },
+    discount: { type: Number, default: 0 },
+    stockQuantity: { type: Number, required: true },
 
-    // 💰 Original Price
-    price: {
-      type: Number,
-      required: true,
-      min: 0,
-    },
-
-    // 🔖 Discount (percentage or flat)
-    discount: {
-      type: Number,
-      default: 0,
-      min: 0,
-      max: 100,
-    },
-
-    // 📦 Stock Quantity
-    stockQuantity: {
-      type: Number,
-      required: true,
-      min: 0,
-    },
-
-    // 📂 Category (Dropdown – 12 predefined values)
     category: {
       type: String,
+      enum: Object.keys(categoryMap),
       required: true,
-      enum: [
-        "Food & Beverage",
-        "Electronics",
-        "Fashion",
-        "Travel",
-        "Health & Beauty",
-        "Education",
-        "Automobile",
-        "Real Estate",
-        "Home & Living",
-        "Entertainment",
-        "Services",
-        "Others",
-      ],
     },
 
-    // 🎯 Deal Type (Dropdown)
-    dealType: {
+    subCategory: {
       type: String,
       required: true,
+      validate: {
+        validator(value) {
+          return categoryMap[this.category]?.includes(value);
+        },
+        message: "Invalid subcategory for selected category",
+      },
+    },
+
+    dealType: {
+      type: String,
       enum: [
         "Flash Deal",
         "Discount Offer",
@@ -77,35 +42,46 @@ const ProductSchema = new mongoose.Schema(
         "Buy One Get One",
         "Seasonal Offer",
       ],
+      required: true,
     },
 
-    // 🖼️ Multiple Images
-    images: [
-      {
-        type: String, // stored as image URL or path
-      },
-    ],
+    images: [{ type: String }],
 
-    // 🔗 External Directory / Vendor Website Link
     redirectUrl: {
       type: String,
       required: true,
+      match: [/^https?:\/\/.+/, "Invalid URL"],
     },
 
-    // ⏰ Deal Expiry Date (Flash Deal Limit)
-    expiryDate: {
-      type: Date,
-      required: true,
-    },
+    expiryDate: { type: Date, required: true },
 
-    // 📊 Product Status
     status: {
       type: String,
+      enum: ["active", "expired"],
       default: "active",
-      enum: ["active", "expired", "disabled"],
     },
   },
   { timestamps: true }
 );
+
+// * Auto-expire before save
+//  */
+ProductSchema.pre("save", function (next) {
+  if (this.expiryDate && this.expiryDate < new Date()) {
+    this.status = "expired";
+  }
+  next();
+});
+
+// /**
+//  * Auto-expire on update queries
+//  */
+ProductSchema.pre("findOneAndUpdate", function (next) {
+  const update = this.getUpdate();
+  if (update.expiryDate && update.expiryDate < new Date()) {
+    update.status = "expired";
+  }
+  next();
+});
 
 module.exports = mongoose.model("Product", ProductSchema);

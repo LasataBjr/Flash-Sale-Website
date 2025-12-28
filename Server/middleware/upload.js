@@ -2,76 +2,66 @@ const multer = require("multer");
 const path = require("path");
 const fs = require("fs");
 
-// ensure upload folders exist
-const folders = [
-  "uploads",
-  "uploads/profiles",
-  "uploads/businessLogo",
-  "uploads/businessDocs",
-  "uploads/products"
-];
+const folders = {
+  root: "uploads",
+  profiles: "uploads/profiles",
+  businessLogo: "uploads/businessLogo",
+  businessDocs: "uploads/businessDocs",
+  products: "uploads/products",
+};
 
-folders.forEach(dir => {
+Object.values(folders).forEach(dir => {
   if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
 });
 
 const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    if (file.fieldname === "profileImage") return cb(null, "uploads/profiles");
-    if (file.fieldname === "businessLogo") return cb(null, "uploads/businessLogo");
-    if (file.fieldname === "verificationDocument") return cb(null, "uploads/businessDocs");
-    if (file.fieldname === "productImages") return cb(null, "uploads/products"); // ✅ NEW
-
-    cb(null, "uploads");
-    cb(null, "uploads"); // fallback
+  destination: (req, file, cb) => {
+    const map = {
+      profileImage: folders.profiles,
+      businessLogo: folders.businessLogo,
+      verificationDocument: folders.businessDocs,
+      productImages: folders.products,
+    };
+    cb(null, map[file.fieldname] || folders.root);
   },
-  filename: function (req, file, cb) {
-    const unique = Date.now() + "-" + Math.round(Math.random() * 1e9);
-    cb(null, unique + path.extname(file.originalname));
-  }
+  filename: (req, file, cb) => {
+    cb(null, Date.now() + path.extname(file.originalname));
+  },
 });
 
-const imageTypes = ["image/jpeg", "image/png", "image/jpg"];
+const imageTypes = ["image/jpeg", "image/png", "image/jpg", "image/webp"];
 const pdfTypes = ["application/pdf"];
 
 const fileFilter = (req, file, cb) => {
-  if (file.fieldname === "businessLogo" || file.fieldname === "profileImage" || file.fieldname === "productImages") {
-    if (!imageTypes.includes(file.mimetype))
-      return cb(new Error("Only JPG/JPEG/PNG allowed"));
+  console.log("Incoming file:", file.fieldname, file.mimetype);
+  if (["profileImage", "businessLogo", "productImages"].includes(file.fieldname)) {
+    if (!imageTypes.includes(file.mimetype)) {
+      return cb(new Error("Only image files allowed"), false);
+    }
   }
-
   if (file.fieldname === "verificationDocument") {
-    if (!pdfTypes.includes(file.mimetype))
-      return cb(new Error("Only PDF allowed"));
+    if (file.mimetype !== "application/pdf") {
+      return cb(new Error("Only PDF allowed"), false);
+    }
   }
-
   cb(null, true);
 };
+
 
 const upload = multer({
   storage,
   fileFilter,
-  limits: { fileSize: 10 * 1024 * 1024 }
+  limits: { fileSize: 10 * 1024 * 1024 },
 });
 
-const uploadProfileImage = upload.single("profileImage");
-const uploadBusinessLogo = upload.single("businessLogo");
-const uploadVerificationDocument = upload.single("verificationDocument");
-
-const multiUpload = upload.fields([
-  { name: "businessLogo", maxCount: 1 },
-  { name: "verificationDocument", maxCount: 1 },
-  { name: "profileImage", maxCount: 1 }
-]);
-
-/* ================= PRODUCT ================= */
-//  Multiple product images (max 5)
-const uploadProductImages = upload.array("productImages", 5);
-
 module.exports = {
-  uploadProfileImage,
-  uploadBusinessLogo,
-  uploadVerificationDocument,
-  multiUpload,
-  uploadProductImages
+  uploadProfileImage: upload.single("profileImage"),
+  uploadBusinessLogo: upload.single("businessLogo"),
+  uploadVerificationDocument: upload.single("verificationDocument"),
+  multiUpload: upload.fields([
+    { name: "profileImage", maxCount: 1 },
+    { name: "businessLogo", maxCount: 1 },
+    { name: "verificationDocument", maxCount: 1 },
+  ]),
+  uploadProductImages: upload.array("productImages", 5),
 };

@@ -5,7 +5,7 @@ import Login from "./pages/Login";
 import Signup from "./pages/auth/Signup";
 import BusinessDashboard from "./pages/BusinessDashboard";
 import AddProduct from "./pages/AddProduct";
-import ProductManagement  from "./pages/ProductManagement";
+import ProductManagement from "./pages/ProductManagement";
 import AdminDashboard from "./pages/AdminDashboard";
 import ProtectedRoute from "./components/PrivateRoute";
 import ForgotPassword from "./pages/ForgotPassword";
@@ -13,20 +13,20 @@ import ResetPassword from "./pages/ResetPassword";
 import Logout from "./components/Logout";
 import { Routes, Route } from "react-router-dom";
 
-
 export default function App() {
   return (
     <>
       <Navbar />
       <Routes>
-        
         {/* PUBLIC ROUTES */}
-        <Route path="/" element={<Home />} />        
+        <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
         <Route path="/auth/Signup" element={<Signup />} />
         <Route path="/logout" element={<Logout />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
 
-        {/* USER PRIVATE */}
+        {/* USER PRIVATE ROUTES */}
         <Route
           path="/home"
           element={
@@ -36,7 +36,7 @@ export default function App() {
           }
         />
 
-        {/* BUSINESS PRIVATE */}
+        {/* BUSINESS PRIVATE ROUTES */}
         <Route
           path="/business-dashboard"
           element={
@@ -55,7 +55,14 @@ export default function App() {
           }
         />
 
-        <Route path="/business/products/new" element={<AddProduct />} />
+        <Route
+          path="/business/products/new"
+          element={
+            <ProtectedRoute allowed={["business"]}>
+              <AddProduct />
+            </ProtectedRoute>
+          }
+        />
 
         <Route
           path="/business/products/edit/:id"
@@ -66,7 +73,7 @@ export default function App() {
           }
         />
 
-        {/* ADMIN PRIVATE */}
+        {/* ADMIN PRIVATE ROUTES */}
         <Route
           path="/admin"
           element={
@@ -75,11 +82,6 @@ export default function App() {
             </ProtectedRoute>
           }
         />
-
-        {/* AUTH ROUTES */}
-        <Route path="/forgot-password" element={<ForgotPassword />} />
-        <Route path="/reset-password" element={<ResetPassword />} />
-
       </Routes>
       <Footer />
     </>

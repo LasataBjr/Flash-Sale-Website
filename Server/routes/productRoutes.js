@@ -6,18 +6,37 @@ const {
   createProduct,
   getMyProducts,
   deleteProduct,
-  updateProduct
+  updateProduct,
 } = require("../controller/productController");
 
-/**
- * BUSINESS ONLY
- * Status must be approved
- */
+// CREATE
+router.post(
+  "/",
+  auth(["business"]),
+  uploadProductImages,
+  createProduct
+);
 
-router.post("/", auth(["business"]), uploadProductImages, createProduct);
-router.get("/my-products", auth(["business"]), getMyProducts);
-router.put("/:id", auth(["business"]), uploadProductImages, updateProduct);
-router.delete("/:id", auth(["business"]), deleteProduct);
+// READ
+router.get(
+  "/my-products",
+  auth(["business"]),
+  getMyProducts
+);
 
+// UPDATE
+router.put(
+  "/:id",
+  auth(["business"]),
+  uploadProductImages,
+  updateProduct
+);
+
+// DELETE
+router.delete(
+  "/:id",
+  auth(["business"]),
+  deleteProduct
+);
 
 module.exports = router;
