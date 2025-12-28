@@ -1,10 +1,9 @@
 import { Navigate } from "react-router-dom";
 
 export default function PrivateRoute({ children, allowed }) {
-  // Try to get token and user from localStorage first, fallback to sessionStorage
-  const token = localStorage.getItem("token") || sessionStorage.getItem("token");
-  const userData = localStorage.getItem("user") || sessionStorage.getItem("user");
-  const user = userData ? JSON.parse(userData) : null;
+  // Get token and user from localStorage
+  const token = sessionStorage.getItem("token");
+  const user = JSON.parse(sessionStorage.getItem("user"));
 
   // Not logged in or no user data
   if (!token || !user) {

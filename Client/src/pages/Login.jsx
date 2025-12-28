@@ -47,6 +47,7 @@ export default function Login() {
       if (role === "admin") navigate("/admin");
       else if (role === "business") navigate("/business-dashboard");
       else navigate("/home");
+      
     } catch (err) {
       setMessage(err.response?.data?.message || "Login failed ❌");
     }
