@@ -1,47 +1,61 @@
-// Navbar.jsx
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useEffect, useState } from "react";
 
 export default function Navbar() {
   const navigate = useNavigate();
-  const [role, setRole] = useState(null);
+  const location = useLocation();
+  const [user, setUser] = useState(null);
 
-  // Load user role from sessionStorage on mount
+  // Always sync user from storage
   useEffect(() => {
     const storedUser = sessionStorage.getItem("user");
-    if (storedUser) {
-      const parsedUser = JSON.parse(storedUser);
-      setRole(parsedUser.role);
-    }
-  }, []);
+    setUser(storedUser ? JSON.parse(storedUser) : null);
+  }, [location.pathname]); // 🔥 re-run on route change
 
+  const handleLogout = () => {
+    sessionStorage.removeItem("user");
+    sessionStorage.removeItem("token");
+    navigate("/login");
+  };
 
   return (
     <nav style={{ padding: "20px", background: "#ddd" }}>
       <Link to="/">Home</Link> |{" "}
 
-      {/* Show login only if no user */}
-      {!role && <Link to="/login">Login</Link>}
+      {/* Show Login ONLY when not logged in */}
+      {!user && <Link to="/login">Login</Link>}
 
-      {/* Show dashboards based on role */}
-      {role === "business" && (
+      {/* Business dashboard */}
+      {user?.role === "business" && (
         <>
           <Link to="/business-dashboard">Business Dashboard</Link> |{" "}
         </>
       )}
 
-      {role === "admin" && (
+      {/* Admin dashboard */}
+      {user?.role === "admin" && (
         <>
           <Link to="/admin">Admin Dashboard</Link> |{" "}
         </>
       )}
 
-      {/* Logout button if logged in */}
-      {role && <button onClick={() => navigate("/logout")} style={{ marginTop: "20px", padding: "10px 20px", cursor: "pointer" }}
-      >Logout</button>}
+      {/* Logout */}
+      {user && (
+        <button
+          onClick={handleLogout}
+          style={{
+            marginLeft: "10px",
+            padding: "6px 12px",
+            cursor: "pointer",
+          }}
+        >
+          Logout
+        </button>
+      )}
     </nav>
   );
 }
+
 
 
 // import { Link } from "react-router-dom";

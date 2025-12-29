@@ -8,7 +8,7 @@ export default function AdminDashboard() {
   const [users, setUsers] = useState([]);
   const [businesses, setBusinesses] = useState([]);
 
-  const navigate = useNavigate();
+  
 
   const backendURL = "http://localhost:5000"; 
   const token = sessionStorage.getItem("token");
@@ -43,8 +43,7 @@ export default function AdminDashboard() {
   return (
     <div style={{ padding: "20px" }}>
       <h1>Admin Panel</h1>
-      <button onClick={() => navigate("/logout")} style={{ marginTop: "20px", padding: "10px 20px", cursor: "pointer" }}
-      >Logout</button>
+      
 
     
       {/* Users Table */}

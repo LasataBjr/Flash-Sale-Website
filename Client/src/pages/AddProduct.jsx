@@ -59,7 +59,7 @@ export default function AddProduct() {
       const formData = new FormData();
       Object.entries(form).forEach(([k, v]) => formData.append(k, v));
       images.forEach((img) => {
-        formData.append("productImages", img); // ✅ MUST MATCH
+        formData.append("productImages", img); 
       });
 
 
@@ -115,6 +115,17 @@ export default function AddProduct() {
         <input type="date" name="expiryDate" onChange={handleChange} required />
 
         <input type="file" multiple onChange={(e) => setImages([...e.target.files])} />
+        {/* IMAGE PREVIEW */}
+        <div style={{ display: "flex", gap: "10px", marginTop: "10px" }}>
+          {images.map((img, i) => (
+            <img
+              key={i}
+              src={URL.createObjectURL(img)}
+              alt="preview"
+              style={{ width: 80, height: 80, objectFit: "cover" }}
+            />
+          ))}
+        </div>
 
         <button disabled={loading}>{loading ? "Saving..." : "Post Deal"}</button>
       </form>

@@ -73,28 +73,27 @@ export default function ProductManagement() {
     }
   };
 
+  const [previewImages, setPreviewImages] = useState(null);
   const handleEdit = (id) => navigate(`/business/products/edit/${id}`);
   const handleAddProduct = () => navigate("/business/products/new");
 
   const toggleStatus = async (id, currentStatus) => {
-    const nextStatus =
-      currentStatus === "active"
-        ? "disabled"
-        : currentStatus === "disabled"
-        ? "active"
-        : currentStatus;
+    const nextStatus = currentStatus === "active" ? "disabled" : "active";
 
     try {
-      await axios.put(
-        `${backendURL}/products/${id}`,
+      const res = await axios.patch(
+        `${backendURL}/products/${id}/status`,
         { status: nextStatus },
         {
           headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
         }
       );
-      setProducts((prev) =>
-        prev.map((p) => (p._id === id ? { ...p, status: nextStatus } : p))
-      );
+
+      if (res.data.success) {
+        setProducts((prev) =>
+          prev.map((p) => (p._id === id ? { ...p, status: nextStatus } : p))
+        );
+      }
     } catch (err) {
       console.error(err);
       alert("Failed to update status");
@@ -250,12 +249,10 @@ export default function ProductManagement() {
             {filteredProducts.map((p) => (
               <tr key={p._id}>
                 <td>
-                  {p.images?.[0] ? (
-                    <img
-                      src={`${backendURL}${p.images[0]}`}
-                      alt={p.title}
-                      style={{ width: "60px", height: "60px", objectFit: "cover" }}
-                    />
+                  {p.images?.length ? (
+                    <button onClick={() => setPreviewImages(p.images)}>
+                      View ({p.images.length})
+                    </button>
                   ) : (
                     "No Image"
                   )}
@@ -279,7 +276,41 @@ export default function ProductManagement() {
               </tr>
             ))}
           </tbody>
-        </table>
+        </table>        
+      )}
+      {previewImages && (
+        <div
+          style={{
+            position: "fixed",
+            inset: 0,
+            background: "rgba(0,0,0,.6)",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            zIndex: 999,
+          }}
+          onClick={() => setPreviewImages(null)}
+        >
+          <div
+            style={{
+              background: "#fff",
+              padding: 20,
+              display: "flex",
+              gap: 10,
+              flexWrap: "wrap",
+              maxWidth: 600,
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {previewImages.map((img, i) => (
+              <img
+                key={i}
+                src={`${backendURL.replace("/api", "")}${img}`}
+                style={{ width: 150, height: 150, objectFit: "cover" }}
+              />
+            ))}
+          </div>
+        </div>
       )}
     </div>
   );

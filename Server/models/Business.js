@@ -112,6 +112,11 @@ const BusinessSchema = new mongoose.Schema(
       min: 0
     },
 
+    costPerClick: {
+      type: Number,
+      default: 1, // ₹ or $
+    },
+
     // ⭐ NEW FIELD: Total clicks received
     totalClicks: {
       type: Number,

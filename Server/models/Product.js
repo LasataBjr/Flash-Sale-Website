@@ -64,6 +64,8 @@ const ProductSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+module.exports = mongoose.model("Product", ProductSchema);
+
 // * Auto-expire before save
 //  */
 ProductSchema.pre("save", function (next) {
@@ -84,4 +86,4 @@ ProductSchema.pre("findOneAndUpdate", function (next) {
   next();
 });
 
-module.exports = mongoose.model("Product", ProductSchema);
+

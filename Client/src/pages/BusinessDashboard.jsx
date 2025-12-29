@@ -83,11 +83,16 @@ export default function BusinessDashboard() {
       >
         Logout
       </button> */}
-      <button onClick={() => navigate("/logout")} style={{ marginTop: "20px", padding: "10px 20px", cursor: "pointer" }}
-      >Logout</button>
+      
 
       <button onClick={() => navigate("/business/products/new")}>
         ➕ Post a Deal
+      </button>
+      <button onClick={() => navigate("/business/wallet")}>
+        💰 Wallet Balance: ${user.walletBalance}
+      </button>
+      <button onClick={() => navigate("/business/products")}>
+        All Products
       </button>
 
       {message && <p style={{ color: "red" }}>{message}</p>}

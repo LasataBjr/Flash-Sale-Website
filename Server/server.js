@@ -42,6 +42,15 @@ app.use("/api/products", productRoutes);
 const categoryRoutes = require("./routes/categoryRoutes");
 app.use("/api/categories", categoryRoutes);
 
+//Click
+const clickRoutes = require("./routes/clickRoutes");
+app.use("/api/click", clickRoutes);
+
+//Wallet
+const walletRoutes = require("./routes/walletRoutes");
+app.use("/api/wallet", walletRoutes);
+
+
 // Multer / Global Error Handler
 app.use((err, req, res, next) => {
   console.error("UPLOAD ERROR:", err.message);
